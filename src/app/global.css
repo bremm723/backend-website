@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #fdf2f8; /* Soft pink background default */
+  overflow-x: hidden;
+}
+
