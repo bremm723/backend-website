@@ -9,7 +9,6 @@ import FinalLevelModal from "@/components/FinalLevelModal";
 import { useAuth, useRequireAuth } from "@/context/AuthContext";
 import { LEVELS } from "@/data/quizData";
 import { getLevelTheme } from "@/data/moduleThemes";
-import ThemeAudio from "@/components/ThemeAudio";
 import { playClick } from "@/lib/sound";
 
 function Splash({ text }) {
@@ -43,7 +42,6 @@ export default function DashboardPage() {
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-pink-50 via-rose-100 to-red-50 pb-24">
       <FloatingHearts />
-      <ThemeAudio theme={getLevelTheme(Math.min(currentLevel, LEVELS.length))} />
       <Navbar />
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 pt-10 sm:px-6">

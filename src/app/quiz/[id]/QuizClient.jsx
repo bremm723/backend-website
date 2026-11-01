@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import FloatingHearts from "@/components/FloatingHearts";
 import Navbar from "@/components/Navbar";
 import { ThemeArt, ThemeBackdrop, ThemeStatus } from "@/components/ThemeFX";
-import ThemeAudio from "@/components/ThemeAudio";
 import LevelModal from "@/components/LevelModal";
 import FinalLevelModal from "@/components/FinalLevelModal";
 import { useAuth, useRequireAuth } from "@/context/AuthContext";
@@ -326,7 +325,6 @@ export default function QuizClient({ levelId }) {
     >
       <FloatingHearts />
       <ThemeBackdrop theme={theme} />
-      <ThemeAudio theme={theme} />
       <Navbar />
 
       <main className="relative z-10 mx-auto max-w-3xl px-4 pt-8 sm:px-6">

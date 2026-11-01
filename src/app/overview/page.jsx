@@ -7,7 +7,6 @@ import FloatingHearts from "@/components/FloatingHearts";
 import Navbar from "@/components/Navbar";
 import LabConsole from "@/components/LabConsole";
 import { ThemeArt, ThemeBackdrop, ThemeStatus } from "@/components/ThemeFX";
-import ThemeAudio from "@/components/ThemeAudio";
 import { Section } from "@/components/MaterialComponents";
 import { useAuth, useRequireAuth } from "@/context/AuthContext";
 import { LEVELS } from "@/data/quizData";
@@ -90,7 +89,6 @@ export default function OverviewPage() {
     >
       <FloatingHearts />
       <ThemeBackdrop theme={theme} />
-      <ThemeAudio theme={theme} />
       <Navbar />
 
       <main className="relative z-10 mx-auto max-w-7xl px-4 pb-28 pt-10 sm:px-6">
