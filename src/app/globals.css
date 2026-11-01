@@ -1,0 +1,268 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #faf6f2;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   Latar khas tiap tema modul
+   ============================================================ */
+.mt-pattern-bee {
+  background-image:
+    repeating-linear-gradient(60deg, var(--mt-border) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(-60deg, var(--mt-border) 0 1px, transparent 1px 26px);
+}
+
+.mt-pattern-optimus {
+  background-image:
+    linear-gradient(to right, var(--mt-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--mt-border) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.mt-pattern-avenged {
+  background-image:
+    repeating-linear-gradient(115deg, transparent 0 24px, var(--mt-border) 25px, transparent 26px),
+    radial-gradient(circle at 18% 8%, var(--mt-soft-romance) 0, transparent 38%);
+}
+
+.mt-pattern-gaga {
+  background-image:
+    radial-gradient(circle at 20% 20%, var(--mt-border-strong) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 40%, var(--mt-soft-romance) 0 1.5px, transparent 2.5px),
+    linear-gradient(120deg, transparent 0 62%, var(--mt-soft) 62% 63%, transparent 63%);
+  background-size: 70px 70px, 110px 110px, 100% 100%;
+}
+
+.mt-pattern-taksaka {
+  background-image:
+    repeating-linear-gradient(90deg, var(--mt-border-strong) 0 2px, transparent 2px 28px),
+    linear-gradient(
+      to bottom,
+      transparent 0 14px,
+      var(--mt-border) 14px 16px,
+      transparent 16px 30px,
+      var(--mt-border) 30px 32px,
+      transparent 32px 46px
+    );
+  background-size: 28px 46px, 100% 46px;
+}
+
+/* ============================================================
+   Kaca tipis: latar tema tetap tembus, teks tetap terbaca.
+   Tema gelap (Nightmare) menimpa opasitas lewat variabel.
+   ============================================================ */
+.mt-glass {
+  background: linear-gradient(
+    140deg,
+    var(--mt-glass-a, rgba(255, 255, 255, 0.62)) 0%,
+    var(--mt-glass-b, rgba(255, 255, 255, 0.34)) 52%,
+    var(--mt-glass-c, rgba(255, 255, 255, 0.5)) 100%
+  );
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    0 24px 60px -34px var(--mt-shadow, rgba(80, 60, 90, 0.25));
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .mt-glass {
+    background: rgba(255, 255, 255, 0.88);
+  }
+}
+
+@keyframes mt-float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -14px, 0) rotate(2deg); }
+}
+
+@keyframes mt-bee-fly {
+  0% { transform: translate3d(-12vw, 6vh, 0) rotate(-8deg); }
+  25% { transform: translate3d(18vw, -3vh, 0) rotate(7deg); }
+  50% { transform: translate3d(46vw, 8vh, 0) rotate(-4deg); }
+  75% { transform: translate3d(74vw, -4vh, 0) rotate(8deg); }
+  100% { transform: translate3d(110vw, 7vh, 0) rotate(-6deg); }
+}
+
+@keyframes mt-scan {
+  0% { transform: translateY(-30vh); opacity: 0; }
+  10% { opacity: 0.55; }
+  90% { opacity: 0.55; }
+  100% { transform: translateY(115vh); opacity: 0; }
+}
+
+@keyframes mt-orbit {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-16px) rotate(5deg); }
+}
+
+@keyframes mt-bat-fly {
+  0% { transform: translate3d(-12vw, 12vh, 0) scale(0.7) rotate(-8deg); opacity: 0; }
+  12% { opacity: 0.7; }
+  50% { transform: translate3d(48vw, -10vh, 0) scale(1) rotate(8deg); opacity: 0.55; }
+  88% { opacity: 0.55; }
+  100% { transform: translate3d(112vw, 4vh, 0) scale(0.8) rotate(-6deg); opacity: 0; }
+}
+
+@keyframes mt-flicker {
+  0%, 88%, 92%, 96%, 100% { opacity: 0; }
+  89%, 94% { opacity: 0.75; }
+  90%, 95% { opacity: 0.25; }
+}
+
+@keyframes mt-spin-slow {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes mt-twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.8); }
+  50% { opacity: 0.95; transform: scale(1.2); }
+}
+
+@keyframes mt-spotlight-sway {
+  0%, 100% { opacity: 0.20; transform: rotate(-5deg); }
+  50% { opacity: 0.38; transform: rotate(4deg); }
+}
+
+@keyframes mt-pulse-ring {
+  0% { transform: scale(0.85); opacity: 0.6; }
+  70% { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+@keyframes mt-art-scan {
+  0% { transform: translateY(-30%); opacity: 0; }
+  15%, 85% { opacity: 0.6; }
+  100% { transform: translateY(420%); opacity: 0; }
+}
+
+@keyframes mt-art-bee {
+  0% { transform: translate(-40%, 30%) rotate(-8deg); opacity: 0; }
+  18%, 82% { opacity: 0.9; }
+  100% { transform: translate(150%, -30%) rotate(8deg); opacity: 0; }
+}
+
+@keyframes mt-art-bat {
+  0% { transform: translate(-40%, 45%) scale(0.7) rotate(-6deg); opacity: 0; }
+  20%, 80% { opacity: 0.65; }
+  100% { transform: translate(150%, -25%) scale(1.05) rotate(7deg); opacity: 0; }
+}
+
+@keyframes mt-hover-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Kendaraan khas tema: mobil Bumblebee & truk Optimus */
+@keyframes mt-drive {
+  0% { transform: translate3d(-26vw, 0, 0); }
+  100% { transform: translate3d(114vw, 0, 0); }
+}
+
+@keyframes mt-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(2.5px); }
+}
+
+@keyframes mt-drive-art {
+  0% { left: -20%; opacity: 0; }
+  10%, 90% { opacity: 1; }
+  100% { left: 108%; opacity: 0; }
+}
+
+@keyframes mt-road {
+  to { background-position-x: -46px; }
+}
+
+@keyframes mt-track {
+  to { background-position: -28px 0, 0 0; }
+}
+
+@keyframes mt-emblem {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-1deg); }
+  50% { transform: translate3d(0, -16px, 0) rotate(1.5deg); }
+}
+
+@keyframes mt-glow {
+  0%, 100% { opacity: 0.35; transform: scale(0.94); }
+  50% { opacity: 0.7; transform: scale(1.04); }
+}
+
+@keyframes mt-headlight {
+  0%, 100% { opacity: 0.35; transform: scaleX(0.9); }
+  50% { opacity: 0.85; transform: scaleX(1.1); }
+}
+
+.mt-float { animation: mt-float 7s ease-in-out infinite; }
+.mt-float-slow { animation: mt-float 11s ease-in-out infinite; }
+.mt-bee { animation: mt-bee-fly 19s linear infinite; }
+.mt-scan { animation: mt-scan 10s linear infinite; }
+.mt-orbit { animation: mt-orbit 8s ease-in-out infinite; }
+.mt-bat { animation: mt-bat-fly 20s linear infinite; }
+.mt-art-scan { animation: mt-art-scan 7s ease-in-out infinite; }
+.mt-art-bee { animation: mt-art-bee 11s linear infinite; }
+.mt-art-bat { animation: mt-art-bat 12s linear infinite; }
+.mt-drive { animation: mt-drive 30s linear infinite; }
+.mt-drive-slow { animation-duration: 46s; }
+.mt-drive-art { animation: mt-drive-art 12s linear infinite; }
+.mt-bob { animation: mt-bob 1.8s ease-in-out infinite; }
+.mt-emblem { animation: mt-emblem 18s ease-in-out infinite; }
+.mt-glow { animation: mt-glow 7s ease-in-out infinite; }
+.mt-headlight { animation: mt-headlight 2.8s ease-in-out infinite; }
+.mt-road {
+  background-image: repeating-linear-gradient(90deg, var(--mt-border-strong) 0 18px, transparent 18px 46px);
+  background-size: 46px 2px;
+  background-repeat: repeat-x;
+  animation: mt-road 2.2s linear infinite;
+}
+.mt-track {
+  background-image:
+    repeating-linear-gradient(90deg, var(--mt-border-strong) 0 4px, transparent 4px 28px),
+    linear-gradient(
+      to bottom,
+      transparent 0 10px,
+      var(--mt-border-strong) 10px 12px,
+      transparent 12px 26px,
+      var(--mt-border-strong) 26px 28px,
+      transparent 28px 40px
+    );
+  background-size: 28px 40px, 100% 40px;
+  animation: mt-track 1.4s linear infinite;
+}
+.mt-flicker { animation: mt-flicker 7s steps(1) infinite; }
+.mt-spin-slow { animation: mt-spin-slow 18s linear infinite; }
+.mt-twinkle { animation: mt-twinkle 3.4s ease-in-out infinite; }
+.mt-spotlight { animation: mt-spotlight-sway 9s ease-in-out infinite; transform-origin: top center; }
+.mt-pulse-ring { animation: mt-pulse-ring 3.2s ease-out infinite; }
+.mt-hover-bob:hover { animation: mt-hover-bob 0.8s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mt-float,
+  .mt-float-slow,
+  .mt-bee,
+  .mt-scan,
+  .mt-orbit,
+  .mt-bat,
+  .mt-art-scan,
+  .mt-art-bee,
+  .mt-art-bat,
+  .mt-drive,
+  .mt-drive-art,
+  .mt-bob,
+  .mt-emblem,
+  .mt-road,
+  .mt-track,
+  .mt-flicker,
+  .mt-spin-slow,
+  .mt-twinkle,
+  .mt-spotlight,
+  .mt-pulse-ring,
+  .mt-glow,
+  .mt-headlight {
+    animation: none;
+  }
+}

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 
-export default function FinalLevelModal({ isOpen }) {
+export default function FinalLevelModal({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       const shoot = () => {
@@ -48,6 +48,16 @@ export default function FinalLevelModal({ isOpen }) {
           >
             Claim Hadiah 🎁
           </a>
+
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-3 w-full rounded-xl border-2 border-rose-200 bg-white py-3 font-bold text-rose-500 transition-colors hover:bg-rose-50"
+            >
+              Nanti aja, balik belajar dulu 🥺
+            </button>
+          )}
         </motion.div>
       </div>
     </AnimatePresence>
