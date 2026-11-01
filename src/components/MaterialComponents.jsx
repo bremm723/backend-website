@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { NarrationButton } from "@/components/NarrationModal";
+import { TerminalButton } from "@/components/TerminalModal";
 
 export function CopyButton({ text, label = "Salin" }) {
   const [copied, setCopied] = useState(false);
@@ -167,7 +167,7 @@ export function Section({ section, index, isOpen, onToggle, onPractice, onWatch 
             <div className="space-y-4 border-t border-[color:var(--mt-soft)] px-5 pb-5 pt-4">
               {onWatch && (
                 <div className="flex">
-                  <NarrationButton onClick={onWatch} className="w-full sm:w-auto" />
+                  <TerminalButton onClick={onWatch} className="w-full sm:w-auto" />
                 </div>
               )}
 

@@ -8,13 +8,13 @@ import Navbar from "@/components/Navbar";
 import LabConsole from "@/components/LabConsole";
 import { ThemeArt, ThemeBackdrop, ThemeStatus } from "@/components/ThemeFX";
 import { Section } from "@/components/MaterialComponents";
-import NarrationModal, { NarrationButton } from "@/components/NarrationModal";
+import TerminalModal, { TerminalButton } from "@/components/TerminalModal";
 import { useAuth, useRequireAuth } from "@/context/AuthContext";
 import { LEVELS } from "@/data/quizData";
 import { QUIZ_TOPICS } from "@/data/curriculum";
 import { getLab } from "@/data/labData";
 import { getLevelTheme, getModuleTheme } from "@/data/moduleThemes";
-import { buildSectionNarration, buildTopicNarration } from "@/lib/narration";
+import { buildSectionDemo, buildTopicDemo } from "@/lib/terminalDemo";
 import { playClick } from "@/lib/sound";
 
 function LoadingSesi() {
@@ -47,7 +47,7 @@ export default function OverviewPage() {
   const [openSection, setOpenSection] = useState(0);
   const [pendingCommand, setPendingCommand] = useState(null);
   const [mobileLabOpen, setMobileLabOpen] = useState(false);
-  const [narration, setNarration] = useState(null);
+  const [terminal, setTerminal] = useState(null);
 
   useEffect(() => {
     if (!mobileLabOpen) return undefined;
@@ -82,9 +82,9 @@ export default function OverviewPage() {
     }
   };
 
-  const openNarration = (title, script) => {
+  const openTerminal = (title, buildDemo, key) => {
     playClick();
-    setNarration({ title, script });
+    setTerminal({ title, buildDemo, key });
   };
 
   const previousTopic = topicIndex > 0 ? QUIZ_TOPICS[topicIndex - 1] : null;
@@ -256,8 +256,14 @@ export default function OverviewPage() {
                   <p className="mt-4 leading-relaxed text-[color:var(--mt-ink)]">{topic.intro}</p>
 
                   <div className="mt-4">
-                    <NarrationButton
-                      onClick={() => openNarration(`${topic.emoji} ${topic.title}`, buildTopicNarration(topic))}
+                    <TerminalButton
+                      onClick={() =>
+                        openTerminal(
+                          `${topic.emoji} ${topic.title}`,
+                          () => buildTopicDemo(topic),
+                          `topic:${topic.id}`
+                        )
+                      }
                     />
                   </div>
 
@@ -295,7 +301,13 @@ export default function OverviewPage() {
                     isOpen={openSection === i}
                     onToggle={() => setOpenSection(openSection === i ? -1 : i)}
                     onPractice={practiceCommand}
-                    onWatch={() => openNarration(section.title, buildSectionNarration(topic, section))}
+                    onWatch={() =>
+                      openTerminal(
+                        section.title,
+                        () => buildSectionDemo(topic, section),
+                        `section:${topic.id}:${section.title}`
+                      )
+                    }
                   />
                 ))}
 
@@ -447,11 +459,12 @@ export default function OverviewPage() {
         )}
       </AnimatePresence>
 
-      <NarrationModal
-        open={Boolean(narration)}
-        onClose={() => setNarration(null)}
-        title={narration?.title || "Tonton Bareng"}
-        script={narration?.script || ""}
+      <TerminalModal
+        open={Boolean(terminal)}
+        onClose={() => setTerminal(null)}
+        title={terminal?.title || "Terminal Demo"}
+        buildDemo={terminal?.buildDemo}
+        demoKey={terminal?.key}
         theme={theme}
       />
     </div>
