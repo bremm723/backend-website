@@ -6,10 +6,10 @@ import { AnimatePresence, motion } from "framer-motion";
 
 const BUTTON_LABEL = "Tuan Putri, Tonton ini ya sayangg!!";
 const PROMPT = "ratih@nduttt:~$";
-const TYPE_MS = 20;
-const STEP_PAUSE = 320;
-const OUTPUT_MS = 90;
-const NEXT_PAUSE = 650;
+const TYPE_MS = 100;
+const STEP_PAUSE = 450;
+const OUTPUT_MS = 120;
+const NEXT_PAUSE = 800;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -222,7 +222,9 @@ export default function TerminalModal({ open, onClose, title, theme, buildDemo, 
 
   const total = steps?.length || 0;
   const completed = entries.filter((entry) => entry.type === "command").length;
-  const progress = phase === "done" ? 100 : total ? Math.round((completed / total) * 100) : 0;
+  const activeStep = phase === "typing" && steps?.[stepNo - 1] ? steps[stepNo - 1] : null;
+  const typingFraction = activeStep ? Math.min(1, Array.from(typing).length / Math.max(1, Array.from(activeStep.command).length)) : 0;
+  const progress = phase === "done" ? 100 : total ? Math.round(((completed + typingFraction) / total) * 100) : 0;
   const statusText =
     phase === "loading"
       ? "Menyiapkan terminal..."
