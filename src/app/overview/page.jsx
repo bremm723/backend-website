@@ -8,11 +8,13 @@ import Navbar from "@/components/Navbar";
 import LabConsole from "@/components/LabConsole";
 import { ThemeArt, ThemeBackdrop, ThemeStatus } from "@/components/ThemeFX";
 import { Section } from "@/components/MaterialComponents";
+import NarrationModal, { NarrationButton } from "@/components/NarrationModal";
 import { useAuth, useRequireAuth } from "@/context/AuthContext";
 import { LEVELS } from "@/data/quizData";
 import { QUIZ_TOPICS } from "@/data/curriculum";
 import { getLab } from "@/data/labData";
 import { getLevelTheme, getModuleTheme } from "@/data/moduleThemes";
+import { buildSectionNarration, buildTopicNarration } from "@/lib/narration";
 import { playClick } from "@/lib/sound";
 
 function LoadingSesi() {
@@ -45,6 +47,7 @@ export default function OverviewPage() {
   const [openSection, setOpenSection] = useState(0);
   const [pendingCommand, setPendingCommand] = useState(null);
   const [mobileLabOpen, setMobileLabOpen] = useState(false);
+  const [narration, setNarration] = useState(null);
 
   useEffect(() => {
     if (!mobileLabOpen) return undefined;
@@ -77,6 +80,11 @@ export default function OverviewPage() {
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setMobileLabOpen(true);
     }
+  };
+
+  const openNarration = (title, script) => {
+    playClick();
+    setNarration({ title, script });
   };
 
   const previousTopic = topicIndex > 0 ? QUIZ_TOPICS[topicIndex - 1] : null;
@@ -247,6 +255,12 @@ export default function OverviewPage() {
 
                   <p className="mt-4 leading-relaxed text-[color:var(--mt-ink)]">{topic.intro}</p>
 
+                  <div className="mt-4">
+                    <NarrationButton
+                      onClick={() => openNarration(`${topic.emoji} ${topic.title}`, buildTopicNarration(topic))}
+                    />
+                  </div>
+
                   <div className="mt-4 rounded-2xl bg-[color:var(--mt-soft)] p-4">
                     <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-[color:var(--mt-accent)]">
                       Setelah modul ini, kamu bisa
@@ -281,6 +295,7 @@ export default function OverviewPage() {
                     isOpen={openSection === i}
                     onToggle={() => setOpenSection(openSection === i ? -1 : i)}
                     onPractice={practiceCommand}
+                    onWatch={() => openNarration(section.title, buildSectionNarration(topic, section))}
                   />
                 ))}
 
@@ -431,6 +446,14 @@ export default function OverviewPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <NarrationModal
+        open={Boolean(narration)}
+        onClose={() => setNarration(null)}
+        title={narration?.title || "Tonton Bareng"}
+        script={narration?.script || ""}
+        theme={theme}
+      />
     </div>
   );
 }

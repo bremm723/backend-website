@@ -7,11 +7,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import FloatingHearts from "@/components/FloatingHearts";
 import Navbar from "@/components/Navbar";
 import { ThemeArt, ThemeBackdrop, ThemeStatus } from "@/components/ThemeFX";
+import NarrationModal, { NarrationButton } from "@/components/NarrationModal";
 import LevelModal from "@/components/LevelModal";
 import FinalLevelModal from "@/components/FinalLevelModal";
 import { useAuth, useRequireAuth } from "@/context/AuthContext";
 import { getLevelById, LEVELS } from "@/data/quizData";
 import { getLevelTheme } from "@/data/moduleThemes";
+import { buildCheatsheetNarration } from "@/lib/narration";
 import { HEARTS_PER_CORRECT_ANSWER } from "@/lib/firebaseConfig";
 import { playClick, playCorrect, playWrong, playLevelComplete } from "@/lib/sound";
 
@@ -36,6 +38,8 @@ function Splash({ children }) {
 
 /** Ringkasan materi (cheatsheet) yang wajib dibaca sebelum soal muncul. */
 function Cheatsheet({ level, theme, onStart }) {
+  const [narrationOpen, setNarrationOpen] = useState(false);
+
   return (
     <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
       <div className="rounded-[2rem] bg-[linear-gradient(135deg,var(--mt-grad-from),var(--mt-grad-via),var(--mt-grad-to))] p-[2px] shadow-[0_22px_55px_-30px_var(--mt-shadow)]">
@@ -54,6 +58,15 @@ function Cheatsheet({ level, theme, onStart }) {
           </div>
 
           <p className="leading-relaxed text-[color:var(--mt-ink)]">{level.description}</p>
+
+          <div className="mt-4">
+            <NarrationButton
+              onClick={() => {
+                playClick();
+                setNarrationOpen(true);
+              }}
+            />
+          </div>
 
           <div className="mt-6 space-y-4">
             {level.cheatsheet.map((block) => (
@@ -96,6 +109,14 @@ function Cheatsheet({ level, theme, onStart }) {
           </div>
         </div>
       </div>
+
+      <NarrationModal
+        open={narrationOpen}
+        onClose={() => setNarrationOpen(false)}
+        title={`${level.emoji} ${level.title}`}
+        script={buildCheatsheetNarration(level)}
+        theme={theme}
+      />
     </motion.div>
   );
 }

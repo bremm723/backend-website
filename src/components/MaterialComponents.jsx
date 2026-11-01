@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { NarrationButton } from "@/components/NarrationModal";
 
 export function CopyButton({ text, label = "Salin" }) {
   const [copied, setCopied] = useState(false);
@@ -135,7 +136,7 @@ function PracticeCard({ practice, onPractice }) {
   );
 }
 
-export function Section({ section, index, isOpen, onToggle, onPractice }) {
+export function Section({ section, index, isOpen, onToggle, onPractice, onWatch }) {
   return (
     <div className="mt-glass overflow-hidden rounded-3xl border-2 border-[color:var(--mt-border)]">
       <button
@@ -164,6 +165,12 @@ export function Section({ section, index, isOpen, onToggle, onPractice }) {
             transition={{ duration: 0.25 }}
           >
             <div className="space-y-4 border-t border-[color:var(--mt-soft)] px-5 pb-5 pt-4">
+              {onWatch && (
+                <div className="flex">
+                  <NarrationButton onClick={onWatch} className="w-full sm:w-auto" />
+                </div>
+              )}
+
               {section.body && (
                 <ul className="space-y-2.5">
                   {section.body.map((line, i) => (
