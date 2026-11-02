@@ -18,10 +18,13 @@ export default function AnimationTriggerButton({ concept = "GET_REQUEST", onClic
 
   // Warna aksen per konsep
   const accentMap = {
-    GET_REQUEST:    { from: "#f472b6", to: "#e879f9", glow: "rgba(244,114,182,0.55)", icon: "🌐" },
-    POST_REQUEST:   { from: "#fb923c", to: "#f43f5e", glow: "rgba(251,146,60,0.55)",  icon: "📤" },
-    MIDDLEWARE:     { from: "#818cf8", to: "#a78bfa", glow: "rgba(129,140,248,0.55)", icon: "🔗" },
-    DATABASE_QUERY: { from: "#34d399", to: "#22d3ee", glow: "rgba(52,211,153,0.55)",  icon: "🗄️" },
+    GET_REQUEST:     { from: "#f472b6", to: "#e879f9", glow: "rgba(244,114,182,0.55)", icon: "🌐" },
+    POST_REQUEST:    { from: "#fb923c", to: "#f43f5e", glow: "rgba(251,146,60,0.55)",  icon: "📤" },
+    MIDDLEWARE:      { from: "#818cf8", to: "#a78bfa", glow: "rgba(129,140,248,0.55)", icon: "🔗" },
+    DATABASE_QUERY:  { from: "#34d399", to: "#22d3ee", glow: "rgba(52,211,153,0.55)",  icon: "🗄️" },
+    AUTH_FLOW:       { from: "#f59e0b", to: "#ef4444", glow: "rgba(245,158,11,0.55)",  icon: "🔐" },
+    ERROR_FLOW:      { from: "#f87171", to: "#fb923c", glow: "rgba(248,113,113,0.55)", icon: "🛠️" },
+    DEPLOY_PIPELINE: { from: "#60a5fa", to: "#818cf8", glow: "rgba(96,165,250,0.55)",  icon: "🚀" },
   };
 
   const accent = accentMap[concept] ?? accentMap.GET_REQUEST;

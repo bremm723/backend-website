@@ -160,17 +160,19 @@ export async function buildTopicDemo(topic, maxSteps = MAX_STEPS) {
 }
 
 /** Demo untuk satu materi: pakai perintah latihan materi tersebut. */
-export async function buildSectionDemo(topic, section) {
+export async function buildSectionDemo(topic, section, maxSteps = MAX_STEPS, commandOverride = null) {
   if (!topic) return [];
-  if (!section) return buildTopicDemo(topic);
+  if (!section) return buildTopicDemo(topic, maxSteps);
 
   const engine = getLab(topic.id)?.engine || "http";
-  const commands = (section.practice?.commands || [])
-    .map((item) => item.command)
-    .filter(Boolean);
+  const commands = (
+    Array.isArray(commandOverride) && commandOverride.length
+      ? commandOverride
+      : (section.practice?.commands || []).map((item) => item.command)
+  ).filter(Boolean);
 
-  if (!commands.length) return buildTopicDemo(topic, 2);
-  return runCommands(engine, commands, { maxSteps: MAX_STEPS });
+  if (!commands.length) return buildTopicDemo(topic, Math.min(maxSteps, 2));
+  return runCommands(engine, commands, { maxSteps });
 }
 
 /** Demo singkat untuk cheatsheet kuis, memakai lab yang sesuai level. */

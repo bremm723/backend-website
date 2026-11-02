@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getTopicById } from "@/data/curriculum";
+import { buildSectionDemo } from "@/lib/terminalDemo";
 
 /* ================================================================
    CONCEPT DEFINITIONS
@@ -575,12 +577,37 @@ const SECTION_OVERRIDES = {
     titleOverride: "Server Node: Terima & Balas Request",
     subtitleOverride: "http.createServer → routing manual → kirim response",
   },
+  "node:Variabel & tipe data": {
+    conceptKey: "MIDDLEWARE",
+    titleOverride: "Variabel & Tipe Data",
+    subtitleOverride: "const/let menyimpan nilai; tipe data menentukan cara aman mengolahnya",
+  },
+  "node:Fungsi: cara membungkus logika": {
+    conceptKey: "MIDDLEWARE",
+    titleOverride: "Fungsi: Input → Proses → Return",
+    subtitleOverride: "Parameter masuk, logika dijalankan, hasil dikembalikan lewat return",
+  },
+  "node:Array & object: bentuk data backend": {
+    conceptKey: "GET_REQUEST",
+    titleOverride: "Array & Object di Data Backend",
+    subtitleOverride: "filter/map mengolah daftar; object menyimpan field satu entitas",
+  },
+  "node:npm, package.json, dan module": {
+    conceptKey: "DEPLOY_PIPELINE",
+    titleOverride: "npm → package.json → Module",
+    subtitleOverride: "Dependency dicatat, di-install, lalu di-import oleh kode",
+  },
 
   /* ─── DB ─── */
   "db:Kenapa aplikasi butuh database": {
     conceptKey: "DATABASE_QUERY",
     titleOverride: "Server → Database: Data Persisten",
     subtitleOverride: "Database menyimpan data sehingga tidak hilang saat server restart",
+  },
+  "db:Tabel, kolom, tipe data, dan constraint": {
+    conceptKey: "DATABASE_QUERY",
+    titleOverride: "Tabel = Kolom + Tipe + Constraint",
+    subtitleOverride: "Skema menentukan bentuk data dan aturan yang harus dipatuhi",
   },
   "db:SQL vs NoSQL: memilih model data": {
     conceptKey: "DATABASE_QUERY",
@@ -644,6 +671,11 @@ const SECTION_OVERRIDES = {
     titleOverride: "Pertahanan Berlapis",
     subtitleOverride: "SQL injection, XSS, CSRF, IDOR — middleware & query aman sebagai tameng",
   },
+  "auth:Checklist keamanan sebelum rilis": {
+    conceptKey: "AUTH_FLOW",
+    titleOverride: "Checklist Keamanan Sebelum Rilis",
+    subtitleOverride: "Hash password, token aman, validasi input, dan batasi akses per role",
+  },
 
   /* ─── QUALITY ─── */
   "quality:Error yang jelas lebih baik daripada error yang hilang": {
@@ -671,6 +703,16 @@ const SECTION_OVERRIDES = {
     titleOverride: "Test: Kirim Request, Periksa Response",
     subtitleOverride: "Integration test mengirim request dan memverifikasi status + body",
   },
+  "quality:Logging & observability": {
+    conceptKey: "ERROR_FLOW",
+    titleOverride: "Log = Cerita Perjalanan Request",
+    subtitleOverride: "Satu baris log yang baik memuat request id, aksi, durasi, dan hasil",
+  },
+  "quality:Alur debugging yang tidak panik": {
+    conceptKey: "ERROR_FLOW",
+    titleOverride: "Debugging: Reproduksi → Isolasi → Perbaiki",
+    subtitleOverride: "Telusuri dari gejala ke penyebab, bukan menebak sembarangan",
+  },
 
   /* ─── OPS ─── */
   "ops:Dari localhost ke internet": {
@@ -697,6 +739,16 @@ const SECTION_OVERRIDES = {
     conceptKey: "GET_REQUEST",
     titleOverride: "Client → HTTPS → Nginx → App",
     subtitleOverride: "Reverse proxy terminasi TLS dan meneruskan ke aplikasi di port lokal",
+  },
+  "ops:Environment variables & secret": {
+    conceptKey: "DEPLOY_PIPELINE",
+    titleOverride: "Environment Variables & Secret",
+    subtitleOverride: "Konfigurasi dipisah dari kode; secret tidak ikut masuk repo",
+  },
+  "ops:Checklist go-live": {
+    conceptKey: "DEPLOY_PIPELINE",
+    titleOverride: "Checklist Go-Live",
+    subtitleOverride: "Build, test, env, deploy, health check, lalu pantau setelah rilis",
   },
 
   /* ─── CAPSTONE ─── */
@@ -732,14 +784,164 @@ const SECTION_OVERRIDES = {
   },
 };
 
+/* Perintah tambahan khusus animasi, supaya tiap materi punya alur yang
+   benar-benar berbeda walau latihan terminalnya memakai perintah yang sama. */
+const ANIMATION_COMMANDS = {
+  "http:Dari mengetik URL sampai server menjawab": [
+    "GET /api/hearts",
+    "GET /api/hearts?sort=newest&limit=2",
+  ],
+  "node:JavaScript di browser vs Node.js": [
+    'console.log("Halo Ratih, selamat belajar backend!")',
+    "node --version",
+  ],
+  "db:Kenapa aplikasi butuh database": [
+    "SHOW TABLES;",
+    "SELECT * FROM hearts;",
+  ],
+  "rest:API adalah kontrak, bukan sekadar URL": [
+    "GET /api/hearts",
+    "GET /api/hearts/999",
+  ],
+  "rest:Response yang konsisten: data, meta, dan error": [
+    "POST /api/hearts {}",
+    "GET /api/hearts/999",
+  ],
+  "quality:Error yang jelas lebih baik daripada error yang hilang": [
+    "POST /api/hearts {}",
+    "GET /api/crash",
+  ],
+  "quality:Logging & observability": [
+    "GET /api/hearts",
+    "GET /api/crash",
+  ],
+  "quality:Testing API": [
+    "test",
+    "POST /api/hearts {}",
+    "GET /api/hearts/999",
+  ],
+  "capstone:Rancang fitur & kontrak API": [
+    "GET /api/hearts",
+    'POST /api/hearts {"to":"Ratih","note":"Hati dari capstone"}',
+  ],
+};
+
 /* ================================================================
    HELPER: resolve concept + override dari topicId + sectionTitle
    ================================================================ */
+const TOPIC_FALLBACK_CONCEPT = {
+  http: "GET_REQUEST",
+  rest: "GET_REQUEST",
+  node: "MIDDLEWARE",
+  db: "DATABASE_QUERY",
+  auth: "AUTH_FLOW",
+  quality: "ERROR_FLOW",
+  ops: "DEPLOY_PIPELINE",
+  capstone: "POST_REQUEST",
+};
+
 export function resolveAnimationConcept(topicId, sectionTitle) {
   const key = `${topicId}:${sectionTitle}`;
   const override = SECTION_OVERRIDES[key];
   if (override) return override.conceptKey;
-  return null; // tidak ada animasi untuk section ini
+  // Setiap materi tetap punya animasi. Konsep fallback hanya menentukan warna,
+  // karena isi step-nya dibangun dari perintah latihan materi itu sendiri.
+  return TOPIC_FALLBACK_CONCEPT[topicId] ?? "GET_REQUEST";
+}
+
+/** Perintah yang dipakai animasi materi (termasuk tambahan yang dikurasi). */
+export function getAnimationCommands(topicId, sectionTitle) {
+  return ANIMATION_COMMANDS[`${topicId}:${sectionTitle}`] || null;
+}
+
+/* ================================================================
+   HELPER: bangun visual dari alur perintah yang benar-benar dijalankan
+   ================================================================ */
+function flowIcon(label, index) {
+  const value = String(label || "").toLowerCase();
+  if (/(browser|client|kamu|pengguna)/.test(value)) return "💻";
+  if (/(database|db|tabel|table|sql|query|baris|row)/.test(value)) return "🗄️";
+  if (/(log|catat|observability)/.test(value)) return "📋";
+  if (/(test|uji|assert)/.test(value)) return "🧪";
+  if (/(deploy|hosting|build|ci\/cd|pipeline|rilis)/.test(value)) return "🚀";
+  if (/(token|jwt|auth|login|session|role|izin)/.test(value)) return "🔐";
+  if (/(response|hasil|balas|created|ok|status|sukses)/.test(value)) return "✅";
+  if (/(kode|code|parser|variabel|fungsi|runtime|kompilasi)/.test(value)) return "⚙️";
+  if (/(server|handler|controller|route|app|proses)/.test(value)) return "🖥️";
+  return ["🔹", "🔸", "🔹", "🔸"][index % 4];
+}
+
+function shortText(text, max = 20) {
+  const value = String(text || "").replace(/\s+/g, " ").trim();
+  return value.length > max ? `${value.slice(0, max - 1)}…` : value;
+}
+
+function buildFlowNodes(flow) {
+  let labels = (flow || []).map((item) => String(item || "").trim()).filter(Boolean);
+
+  // Kanvas paling nyaman untuk 2–4 node. Kalau alurnya lebih panjang,
+  // ambil awal, tengah, dan akhir supaya tetap terbaca di layar HP.
+  if (labels.length > 4) {
+    labels = [labels[0], labels[1], labels[labels.length - 2], labels[labels.length - 1]];
+  }
+  if (labels.length < 2) labels = ["Perintah", "Proses", "Hasil"];
+
+  const positions =
+    labels.length === 2
+      ? [12, 88]
+      : labels.length === 3
+      ? [10, 50, 90]
+      : [8, 36, 64, 92];
+
+  return labels.map((label, index) => ({
+    id: `flow-${index}`,
+    x: positions[index],
+    y: 50,
+    icon: flowIcon(label, index),
+    label: shortText(label, 22),
+    active: true,
+  }));
+}
+
+function buildFlowPackets(nodes, command) {
+  if (nodes.length < 2) return [];
+  const firstLabel = shortText(command, 22);
+  return nodes.slice(0, -1).map((node, index) => {
+    const next = nodes[index + 1];
+    return {
+      id: `flow-packet-${index}`,
+      label:
+        index === 0
+          ? firstLabel
+          : index === nodes.length - 2
+          ? "hasil"
+          : shortText(next.label, 16),
+      color: index === nodes.length - 2 ? "#34d399" : "#a78bfa",
+      fromNode: node.id,
+      toNode: next.id,
+      delay: index * 0.55,
+    };
+  });
+}
+
+function buildScenarioSteps(demoSteps, section) {
+  const practice = section?.practice?.commands || [];
+  return (demoSteps || []).map((step, index) => {
+    const practiceItem = practice.find((item) => item.command === step.command);
+    const nodes = buildFlowNodes(step.explain?.flow);
+    return {
+      id: `scenario-${index}`,
+      label: practiceItem?.label || shortText(step.command, 34),
+      description:
+        [step.explain?.fungsi, step.explain?.behind].filter(Boolean).join(" ") ||
+        "Perintah dijalankan dan hasilnya ditampilkan di terminal.",
+      command: step.command,
+      blocks: step.blocks || [],
+      explain: step.explain,
+      nodes,
+      packets: buildFlowPackets(nodes, step.command),
+    };
+  });
 }
 
 /* ================================================================
@@ -781,11 +983,11 @@ function NodeBadge({ node, conceptColor }) {
           {node.icon}
         </div>
         <span
-          className="relative z-10 whitespace-nowrap rounded-lg px-1.5 py-0.5 text-center text-[9px] font-bold leading-tight"
+          className="relative z-10 line-clamp-2 break-words rounded-lg px-1.5 py-0.5 text-center text-[9px] font-bold leading-tight"
           style={{
             background: node.active ? `${conceptColor.from}28` : "rgba(255,255,255,0.08)",
             color: node.active ? "white" : "rgba(255,255,255,0.45)",
-            maxWidth: 78,
+            maxWidth: 76,
           }}
         >
           {node.label}
@@ -822,24 +1024,27 @@ function PacketParticle({ packet, nodes }) {
         ease: "easeInOut",
         repeat: Infinity,
         repeatDelay: 0.5,
+        delay: packet.delay || 0,
       }}
     >
       <div
-        className="flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[9px] font-bold shadow-lg"
+        className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold shadow-lg"
         style={{
           background: `linear-gradient(90deg, ${packet.color}ee, ${packet.color}aa)`,
           color: "white",
           boxShadow: `0 0 10px ${packet.color}77, 0 2px 6px rgba(0,0,0,0.28)`,
           border: `1px solid ${packet.color}`,
+          maxWidth: 148,
         }}
       >
         <motion.span
+          className="shrink-0"
           animate={{ x: dx > 0 ? [0, 2, 0] : [0, -2, 0] }}
           transition={{ duration: 0.45, repeat: Infinity }}
         >
           {dx > 0 ? "→" : "←"}
         </motion.span>
-        {packet.label}
+        <span className="min-w-0 truncate">{packet.label}</span>
       </div>
     </motion.div>
   );
@@ -957,6 +1162,113 @@ function AnimationControls({ isPlaying, onPlay, onPause, onPrev, onNext, onRepla
 }
 
 /* ================================================================
+   SUB-KOMPONEN: Terminal Preview
+   Mengetik perintah yang benar-benar dipakai materi, lalu menampilkan
+   output asli dari mesin lab. Jadi animasi bukan cuma gambar diam.
+   ================================================================ */
+const TERMINAL_TONE = {
+  success: "text-emerald-300",
+  error: "text-rose-300",
+  warn: "text-amber-300",
+  info: "text-cyan-300",
+  muted: "text-white/40",
+  code: "text-pink-200",
+  table: "text-white/70",
+  text: "text-white/75",
+};
+
+function TerminalPreview({ step, conceptColor, topicLabel }) {
+  const [typed, setTyped] = useState("");
+  const [showOutput, setShowOutput] = useState(false);
+
+  useEffect(() => {
+    setTyped("");
+    setShowOutput(false);
+
+    const command = step?.command || "";
+    if (!command) return undefined;
+
+    let index = 0;
+    let outputTimer;
+    const typer = setInterval(() => {
+      index += 1;
+      setTyped(command.slice(0, index));
+      if (index >= command.length) {
+        clearInterval(typer);
+        outputTimer = setTimeout(() => setShowOutput(true), 180);
+      }
+    }, 22);
+
+    return () => {
+      clearInterval(typer);
+      clearTimeout(outputTimer);
+    };
+  }, [step?.command]);
+
+  if (!step?.command) return null;
+
+  return (
+    <div
+      className="overflow-hidden rounded-2xl border bg-[#090510]"
+      style={{ borderColor: `${conceptColor.from}35` }}
+    >
+      <div
+        className="flex items-center gap-2 border-b px-3 py-1.5"
+        style={{ borderColor: `${conceptColor.from}22`, background: `${conceptColor.from}0d` }}
+      >
+        <span className="flex gap-1">
+          <span className="h-1.5 w-1.5 rounded-full bg-rose-400/70" />
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-300/70" />
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400/70" />
+        </span>
+        <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/35">
+          Terminal · {topicLabel || "lab"}
+        </span>
+        <span className="ml-auto rounded-full bg-emerald-400/10 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-emerald-300/80">
+          live lab
+        </span>
+      </div>
+
+      <div className="max-h-40 overflow-y-auto px-3 py-2 font-mono text-[10px] leading-relaxed">
+        <div className="break-words">
+          <span className="text-emerald-400">ratih@nduttt</span>
+          <span className="text-white/35">:~$ </span>
+          <span className="whitespace-pre-wrap text-white/90">{typed}</span>
+          {typed.length < step.command.length && (
+            <motion.span
+              animate={{ opacity: [1, 0, 1] }}
+              transition={{ duration: 0.9, repeat: Infinity }}
+              className="ml-0.5 inline-block h-3 w-1.5 translate-y-0.5 bg-pink-300"
+            />
+          )}
+        </div>
+
+        {showOutput &&
+          step.blocks.map((block, index) => {
+            if (block.kind === "blank") {
+              return <div key={index} className="h-1.5" />;
+            }
+            return (
+              <div
+                key={index}
+                className={`whitespace-pre-wrap break-words ${
+                  TERMINAL_TONE[block.kind] || TERMINAL_TONE.text
+                }`}
+              >
+                {block.text}
+              </div>
+            );
+          })}
+
+        {showOutput && step.blocks.length === 0 && (
+          <div className="text-white/35">(tidak ada output)</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================
    KOMPONEN UTAMA: BackendAnimationModal
    ================================================================ */
 
@@ -975,15 +1287,65 @@ export default function BackendAnimationModal({ concept = "GET_REQUEST", isOpen,
   const override = overrideKey ? SECTION_OVERRIDES[overrideKey] : null;
   const resolvedConcept = (override?.conceptKey) ?? concept;
 
-  const conceptData = BASE_CONCEPTS[resolvedConcept] ?? BASE_CONCEPTS.GET_REQUEST;
-  const { steps, color: conceptColor } = conceptData;
+  const topicData = topicId ? getTopicById(topicId) : null;
+  const sectionData = topicData?.sections?.find((section) => section.title === sectionTitle);
 
-  const title    = override?.titleOverride    ?? conceptData.title;
-  const subtitle = override?.subtitleOverride ?? conceptData.subtitle;
+  const conceptData = BASE_CONCEPTS[resolvedConcept] ?? BASE_CONCEPTS.GET_REQUEST;
+  const conceptColor = conceptData.color;
+
+  const title =
+    override?.titleOverride ?? sectionData?.title ?? conceptData.title;
+  const subtitle =
+    override?.subtitleOverride ??
+    sectionData?.practice?.prompt ??
+    conceptData.subtitle;
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying]     = useState(false);
+  const [dynamicSteps, setDynamicSteps] = useState(null);
   const intervalRef = useRef(null);
+
+  // Ambil perintah latihan materi yang sedang dibuka, jalankan di lab,
+  // lalu ubah hasilnya menjadi step animasi + isi terminal.
+  useEffect(() => {
+    if (!isOpen) {
+      setDynamicSteps(null);
+      return undefined;
+    }
+
+    const activeTopic = topicId ? getTopicById(topicId) : null;
+    const activeSection = activeTopic?.sections?.find(
+      (section) => section.title === sectionTitle
+    );
+
+    if (!activeTopic || !activeSection) {
+      setDynamicSteps(null);
+      return undefined;
+    }
+
+    let cancelled = false;
+    setDynamicSteps(null);
+
+    const animationCommands =
+      ANIMATION_COMMANDS[`${activeTopic.id}:${activeSection.title}`];
+
+    buildSectionDemo(activeTopic, activeSection, 5, animationCommands)
+      .then((demoSteps) => {
+        if (cancelled) return;
+        const scenario = buildScenarioSteps(demoSteps, activeSection);
+        setDynamicSteps(scenario.length ? scenario : null);
+      })
+      .catch(() => {
+        if (!cancelled) setDynamicSteps(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, topicId, sectionTitle]);
+
+  const staticSteps = conceptData.steps;
+  const steps = dynamicSteps?.length ? dynamicSteps : staticSteps;
 
   const stopAutoPlay = useCallback(() => {
     clearInterval(intervalRef.current);
@@ -993,7 +1355,7 @@ export default function BackendAnimationModal({ concept = "GET_REQUEST", isOpen,
   useEffect(() => {
     if (isOpen) { setCurrentStep(0); setIsPlaying(false); }
     return () => clearInterval(intervalRef.current);
-  }, [isOpen, resolvedConcept]);
+  }, [isOpen, resolvedConcept, topicId, sectionTitle, dynamicSteps]);
 
   const startAutoPlay = useCallback(() => {
     setIsPlaying(true);
@@ -1002,7 +1364,7 @@ export default function BackendAnimationModal({ concept = "GET_REQUEST", isOpen,
         if (prev >= steps.length - 1) { stopAutoPlay(); return prev; }
         return prev + 1;
       });
-    }, 2300);
+    }, 3800);
   }, [steps.length, stopAutoPlay]);
 
   const handlePlay   = () => { if (!isPlaying) startAutoPlay(); };
@@ -1019,7 +1381,7 @@ export default function BackendAnimationModal({ concept = "GET_REQUEST", isOpen,
     return () => window.removeEventListener("keydown", onKey);
   }, [isOpen]);
 
-  const step = steps[currentStep];
+  const step = steps[currentStep] ?? steps[0];
 
   // Badge warna per konsep
   const conceptBadgeLabel = {
@@ -1032,25 +1394,26 @@ export default function BackendAnimationModal({ concept = "GET_REQUEST", isOpen,
     DEPLOY_PIPELINE: "Deploy Pipeline",
   }[resolvedConcept] ?? resolvedConcept;
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.22 }}
-          onClick={handleClose}
-          style={{ background: "rgba(4,0,12,0.80)", backdropFilter: "blur(7px)" }}
-        >
+    <motion.div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.22 }}
+      onClick={handleClose}
+      style={{ background: "rgba(4,0,12,0.80)", backdropFilter: "blur(7px)" }}
+    >
           <motion.div
             initial={{ opacity: 0, scale: 0.87, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 16 }}
             transition={{ type: "spring", stiffness: 310, damping: 28 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-2xl overflow-hidden rounded-3xl shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
+            className="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-3xl shadow-2xl"
             style={{
               background: "linear-gradient(160deg, rgba(16,6,28,0.98), rgba(8,4,20,0.99))",
               border: `1.5px solid ${conceptColor.from}50`,
@@ -1082,7 +1445,7 @@ export default function BackendAnimationModal({ concept = "GET_REQUEST", isOpen,
                     </span>
                     <span className="rounded-lg px-2 py-0.5 text-[9px] font-bold text-white/35"
                       style={{ background: "rgba(255,255,255,0.06)" }}>
-                      {conceptBadgeLabel}
+                      {topicData ? `${topicData.emoji} ${topicData.shortTitle}` : conceptBadgeLabel}
                     </span>
                     {sectionTitle && (
                       <span className="hidden text-[9px] text-white/28 sm:block">
@@ -1102,6 +1465,12 @@ export default function BackendAnimationModal({ concept = "GET_REQUEST", isOpen,
 
             {/* Body */}
             <div className="space-y-3.5 p-5">
+              <TerminalPreview
+                step={step}
+                conceptColor={conceptColor}
+                topicLabel={topicData?.shortTitle}
+              />
+
               <AnimationCanvas step={step} conceptColor={conceptColor} />
 
               {/* Deskripsi step */}
@@ -1127,7 +1496,26 @@ export default function BackendAnimationModal({ concept = "GET_REQUEST", isOpen,
                     </span>
                     <div>
                       <p className="text-sm font-bold text-white">{step.label}</p>
-                      <p className="mt-0.5 text-[11px] leading-relaxed text-white/60">{step.description}</p>
+                      {step.explain ? (
+                        <>
+                          <p className="mt-1 text-[11px] leading-relaxed text-white/60">
+                            <span className="font-black uppercase tracking-wider text-white/30">Fungsi · </span>
+                            {step.explain.fungsi}
+                          </p>
+                          {Array.isArray(step.explain.flow) && step.explain.flow.length > 0 && (
+                            <p className="mt-1 break-words text-[11px] leading-relaxed text-white/50">
+                              <span className="font-black uppercase tracking-wider text-white/30">Alur · </span>
+                              {step.explain.flow.join(" → ")}
+                            </p>
+                          )}
+                          <p className="mt-1 text-[11px] leading-relaxed text-white/45">
+                            <span className="font-black uppercase tracking-wider text-white/30">Cara kerjanya · </span>
+                            {step.explain.behind}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="mt-0.5 text-[11px] leading-relaxed text-white/60">{step.description}</p>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -1160,7 +1548,5 @@ export default function BackendAnimationModal({ concept = "GET_REQUEST", isOpen,
             </div>
           </motion.div>
         </motion.div>
-      )}
-    </AnimatePresence>
   );
 }
