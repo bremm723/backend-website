@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TerminalButton } from "@/components/TerminalModal";
+import AnimationTriggerButton from "@/components/AnimationTriggerButton";
 
 export function CopyButton({ text, label = "Salin" }) {
   const [copied, setCopied] = useState(false);
@@ -136,7 +137,7 @@ function PracticeCard({ practice, onPractice }) {
   );
 }
 
-export function Section({ section, index, isOpen, onToggle, onPractice, onWatch }) {
+export function Section({ section, index, isOpen, onToggle, onPractice, onWatch, onAnimate, animateConcept }) {
   return (
     <div className="mt-glass overflow-hidden rounded-3xl border-2 border-[color:var(--mt-border)]">
       <button
@@ -165,9 +166,16 @@ export function Section({ section, index, isOpen, onToggle, onPractice, onWatch 
             transition={{ duration: 0.25 }}
           >
             <div className="space-y-4 border-t border-[color:var(--mt-soft)] px-5 pb-5 pt-4">
-              {onWatch && (
-                <div className="flex">
-                  <TerminalButton onClick={onWatch} className="w-full sm:w-auto" />
+              {/* Baris tombol aksi: Terminal + Animasi */}
+              {(onWatch || onAnimate) && (
+                <div className="flex flex-wrap gap-2">
+                  {onWatch && <TerminalButton onClick={onWatch} />}
+                  {onAnimate && animateConcept && (
+                    <AnimationTriggerButton
+                      concept={animateConcept}
+                      onClick={onAnimate}
+                    />
+                  )}
                 </div>
               )}
 

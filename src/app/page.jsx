@@ -1,20 +1,28 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import FloatingHearts from "@/components/FloatingHearts";
+import IntroScreen from "@/components/IntroScreen";
 import { useAuth } from "@/context/AuthContext";
 
-// Halaman depan = pintu gerbang: login → /dashboard, belum login → /login.
+// Halaman depan = pintu gerbang: intro singkat → login / dashboard.
 export default function Home() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const [showIntro, setShowIntro] = useState(true);
+
+  const finishIntro = useCallback(() => setShowIntro(false), []);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || showIntro) return;
     router.replace(user ? "/dashboard" : "/login");
-  }, [loading, user, router]);
+  }, [loading, user, router, showIntro]);
+
+  if (showIntro) {
+    return <IntroScreen onFinish={finishIntro} />;
+  }
 
   return (
     <main className="relative grid min-h-screen place-items-center overflow-hidden bg-gradient-to-br from-pink-50 via-rose-100 to-white px-6 text-center">

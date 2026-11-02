@@ -7,6 +7,7 @@
  */
 
 import { createLabState, runLabCommand } from "@/lib/labEngine";
+import { explainCommand } from "@/lib/commandExplainer";
 import { getLab } from "@/data/labData";
 
 const MAX_STEPS = 3;
@@ -125,7 +126,11 @@ async function runCommands(engine, commands, { maxSteps = MAX_STEPS, onlyWithOut
       blocks = [{ kind: "muted", text: "(tidak ada output)" }];
     }
 
-    steps.push({ command, blocks });
+    steps.push({
+      command,
+      blocks,
+      explain: explainCommand(engine, command, result),
+    });
     if (steps.length >= maxSteps) break;
   }
 

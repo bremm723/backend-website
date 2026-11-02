@@ -16,6 +16,7 @@ import { getLab } from "@/data/labData";
 import { getLevelTheme, getModuleTheme } from "@/data/moduleThemes";
 import { buildSectionDemo, buildTopicDemo } from "@/lib/terminalDemo";
 import { playClick } from "@/lib/sound";
+import BackendAnimationModal, { resolveAnimationConcept } from "@/components/BackendAnimationModal";
 
 function LoadingSesi() {
   return (
@@ -48,6 +49,7 @@ export default function OverviewPage() {
   const [pendingCommand, setPendingCommand] = useState(null);
   const [mobileLabOpen, setMobileLabOpen] = useState(false);
   const [terminal, setTerminal] = useState(null);
+  const [animationModal, setAnimationModal] = useState(null); // { concept, topicId, sectionTitle }
 
   useEffect(() => {
     if (!mobileLabOpen) return undefined;
@@ -267,6 +269,8 @@ export default function OverviewPage() {
                     />
                   </div>
 
+                  {/* ── Tombol Animasi Interaktif sudah ada di dalam setiap section ── */}
+
                   <div className="mt-4 rounded-2xl bg-[color:var(--mt-soft)] p-4">
                     <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-[color:var(--mt-accent)]">
                       Setelah modul ini, kamu bisa
@@ -293,23 +297,39 @@ export default function OverviewPage() {
                   </div>
                 </div>
 
-                {topic.sections.map((section, i) => (
-                  <Section
-                    key={`${topic.id}-${section.title}`}
-                    section={section}
-                    index={i}
-                    isOpen={openSection === i}
-                    onToggle={() => setOpenSection(openSection === i ? -1 : i)}
-                    onPractice={practiceCommand}
-                    onWatch={() =>
-                      openTerminal(
-                        section.title,
-                        () => buildSectionDemo(topic, section),
-                        `section:${topic.id}:${section.title}`
-                      )
-                    }
-                  />
-                ))}
+                {topic.sections.map((section, i) => {
+                  const sectionConcept = resolveAnimationConcept(topic.id, section.title);
+                  return (
+                    <Section
+                      key={`${topic.id}-${section.title}`}
+                      section={section}
+                      index={i}
+                      isOpen={openSection === i}
+                      onToggle={() => setOpenSection(openSection === i ? -1 : i)}
+                      onPractice={practiceCommand}
+                      onWatch={() =>
+                        openTerminal(
+                          section.title,
+                          () => buildSectionDemo(topic, section),
+                          `section:${topic.id}:${section.title}`
+                        )
+                      }
+                      onAnimate={
+                        sectionConcept
+                          ? () => {
+                              playClick();
+                              setAnimationModal({
+                                concept: sectionConcept,
+                                topicId: topic.id,
+                                sectionTitle: section.title,
+                              });
+                            }
+                          : undefined
+                      }
+                      animateConcept={sectionConcept}
+                    />
+                  );
+                })}
 
                 <div className="rounded-3xl border-2 border-[color:var(--mt-border)] bg-[color:var(--mt-soft-2)] p-6">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[color:var(--mt-accent)]">Rangkuman Modul</p>
@@ -466,6 +486,15 @@ export default function OverviewPage() {
         buildDemo={terminal?.buildDemo}
         demoKey={terminal?.key}
         theme={theme}
+      />
+
+      {/* ── Modal Animasi Interaktif Backend ── */}
+      <BackendAnimationModal
+        concept={animationModal?.concept ?? "GET_REQUEST"}
+        topicId={animationModal?.topicId}
+        sectionTitle={animationModal?.sectionTitle}
+        isOpen={Boolean(animationModal)}
+        onClose={() => setAnimationModal(null)}
       />
     </div>
   );

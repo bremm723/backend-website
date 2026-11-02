@@ -1,0 +1,59 @@
+/* Latar intro: lembut, hangat, dan ringan (tanpa iframe/video). */
+.intro-screen {
+  background:
+    radial-gradient(circle at 15% 18%, #ffe4f0 0%, transparent 55%),
+    radial-gradient(circle at 86% 14%, #e0f2fe 0%, transparent 50%),
+    radial-gradient(circle at 50% 100%, #fce7f3 0%, transparent 58%),
+    linear-gradient(135deg, #fff7fa 0%, #ffe9f2 48%, #f5f3ff 100%);
+}
+
+.intro-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(46px);
+  opacity: 0.5;
+  pointer-events: none;
+  animation: intro-drift 12s ease-in-out infinite;
+}
+
+.intro-blob-1 {
+  top: -8rem;
+  left: -6rem;
+  width: 22rem;
+  height: 22rem;
+  background: #f9a8d4;
+}
+
+.intro-blob-2 {
+  top: 10%;
+  right: -7rem;
+  width: 24rem;
+  height: 24rem;
+  background: #a5b4fc;
+  animation-delay: -4s;
+}
+
+.intro-blob-3 {
+  bottom: -10rem;
+  left: 30%;
+  width: 26rem;
+  height: 26rem;
+  background: #fda4af;
+  animation-delay: -8s;
+}
+
+@keyframes intro-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(1.5rem, -1.25rem, 0) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-blob {
+    animation: none;
+  }
+}
